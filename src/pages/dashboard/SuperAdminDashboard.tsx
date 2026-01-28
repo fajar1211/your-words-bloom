@@ -54,7 +54,6 @@ export default function SuperAdminDashboard() {
       { title: "Payments (soon)", url: "/dashboard/super-admin/payments", icon: CreditCard },
       { title: "Subscriptions", url: "/dashboard/super-admin/subscriptions", icon: Activity },
       { title: "Promotions", url: "/dashboard/super-admin/promotions", icon: BadgePercent },
-      { title: "Security (soon)", url: "/dashboard/super-admin/security", icon: Lock },
       { title: "Access Control", url: "/dashboard/super-admin/access-control", icon: Bell },
       { title: "Audit Logs (soon)", url: "/dashboard/super-admin/audit-logs", icon: FileSearch },
       { title: "System Settings (soon)", url: "/dashboard/super-admin/system-settings", icon: Settings },
@@ -141,7 +140,6 @@ export default function SuperAdminDashboard() {
               <Route path="payments" element={<SuperAdminPlaceholder title="Payments" />} />
               <Route path="subscriptions" element={<SuperAdminSubscriptions />} />
               <Route path="promotions" element={<SuperAdminPromotions />} />
-              <Route path="security" element={<SuperAdminPlaceholder title="Security" />} />
               <Route path="access-control" element={<SuperAdminAccessControl />} />
               <Route path="audit-logs" element={<SuperAdminPlaceholder title="Audit Logs" />} />
               <Route path="system-settings" element={<SuperAdminPlaceholder title="System Settings" />} />
