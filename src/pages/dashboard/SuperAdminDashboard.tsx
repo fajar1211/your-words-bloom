@@ -48,17 +48,17 @@ export default function SuperAdminDashboard() {
   const navItems: SuperAdminNavItem[] = useMemo(
     () => [
       { title: "Dashboard", url: "/dashboard/super-admin", icon: LayoutDashboard },
-      { title: "Admin Management", url: "/dashboard/super-admin/admin-management", icon: Shield },
       { title: "Users & Assists", url: "/dashboard/super-admin/users-assists", icon: Users },
+      { title: "Admin Management", url: "/dashboard/super-admin/admin-management", icon: Shield },
+      { title: "Access Control", url: "/dashboard/super-admin/access-control", icon: Bell },
       { title: "Services / Packages", url: "/dashboard/super-admin/packages", icon: Package },
       { title: "Payments (soon)", url: "/dashboard/super-admin/payments", icon: CreditCard },
       { title: "Subscriptions", url: "/dashboard/super-admin/subscriptions", icon: Activity },
       { title: "Promotions", url: "/dashboard/super-admin/promotions", icon: BadgePercent },
-      { title: "Access Control", url: "/dashboard/super-admin/access-control", icon: Bell },
       { title: "Audit Logs (soon)", url: "/dashboard/super-admin/audit-logs", icon: FileSearch },
-      { title: "System Settings (soon)", url: "/dashboard/super-admin/system-settings", icon: Settings },
       { title: "Reports (soon)", url: "/dashboard/super-admin/reports", icon: BookOpen },
       { title: "Integrations", url: "/dashboard/super-admin/integrations", icon: BookOpen },
+      { title: "System Settings (soon)", url: "/dashboard/super-admin/system-settings", icon: Settings },
       { title: "My Account", url: "/dashboard/super-admin/my-account", icon: Shield },
     ],
     []
