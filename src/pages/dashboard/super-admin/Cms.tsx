@@ -404,14 +404,10 @@ export default function SuperAdminCms() {
         <MidtransIntegrationCard
           loading={midtrans.loading}
           status={midtrans.status}
-          value={midtrans.value}
-          onChange={midtrans.onChange}
-          onSave={midtrans.onSave}
+          selectedEnv={midtrans.selectedEnv}
+          onSelectedEnvChange={midtrans.setSelectedEnv}
+          onSaveSelectedEnv={midtrans.onSaveSelectedEnv}
           onRefresh={midtrans.onRefresh}
-          onClear={midtrans.onClear}
-          onRevealServerKey={midtrans.onRevealServerKey}
-          onHideServerKey={midtrans.onHideServerKey}
-          revealedServerKey={midtrans.revealedServerKey}
         />
 
         <Card>

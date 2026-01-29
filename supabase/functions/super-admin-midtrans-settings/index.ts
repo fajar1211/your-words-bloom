@@ -12,11 +12,13 @@ type Payload =
   | { action: "get" }
   | { action: "reveal"; env: Env }
   | { action: "clear"; env: Env }
-  | { action: "set"; env: Env; merchant_id: string; client_key: string; server_key: string };
+  | { action: "set"; env: Env; merchant_id: string; client_key: string; server_key: string }
+  | { action: "set_active_env"; env: Env };
 
 const WS_MERCHANT_ID = "midtrans_merchant_id";
 const WS_CLIENT_KEY_SANDBOX = "midtrans_client_key_sandbox";
 const WS_CLIENT_KEY_PRODUCTION = "midtrans_client_key_production";
+const WS_ACTIVE_ENV = "midtrans_active_env";
 
 function secretNameForEnv(env: Env) {
   return env === "sandbox" ? "server_key_sandbox" : "server_key_production";
@@ -68,6 +70,12 @@ async function getWebsiteSetting(admin: any, key: string): Promise<{ value: unkn
   if (error) throw error;
   if (!data) return null;
   return { value: (data as any).value, updated_at: (data as any).updated_at ? String((data as any).updated_at) : null };
+}
+
+function normalizeEnv(input: unknown): Env {
+  const v = String(input ?? "").trim().toLowerCase();
+  if (v !== "sandbox" && v !== "production") throw new Error("Invalid env");
+  return v as Env;
 }
 
 async function getSecretRow(admin: any, name: string) {
@@ -131,6 +139,7 @@ Deno.serve(async (req) => {
       const merchant = await getWebsiteSetting(admin, WS_MERCHANT_ID);
       const sandboxClient = await getWebsiteSetting(admin, WS_CLIENT_KEY_SANDBOX);
       const productionClient = await getWebsiteSetting(admin, WS_CLIENT_KEY_PRODUCTION);
+      const activeEnv = await getWebsiteSetting(admin, WS_ACTIVE_ENV);
 
       const sandboxSecret = await getSecretRow(admin, secretNameForEnv("sandbox"));
       const productionSecret = await getSecretRow(admin, secretNameForEnv("production"));
@@ -138,6 +147,12 @@ Deno.serve(async (req) => {
       const merchantId = typeof merchant?.value === "string" ? merchant.value : null;
       const sandboxClientKey = typeof sandboxClient?.value === "string" ? sandboxClient.value : null;
       const productionClientKey = typeof productionClient?.value === "string" ? productionClient.value : null;
+
+      const active_env = (() => {
+        const v = typeof activeEnv?.value === "string" ? activeEnv.value : null;
+        if (v === "sandbox" || v === "production") return v;
+        return null;
+      })();
 
       const sandboxServer = sandboxSecret && String((sandboxSecret as any)?.iv ?? "") === "plain" ? String((sandboxSecret as any)?.ciphertext ?? "") : "";
       const productionServer =
@@ -156,6 +171,7 @@ Deno.serve(async (req) => {
         JSON.stringify({
           configured: Boolean(merchantId || sandboxClientKey || productionClientKey || sandboxServer || productionServer),
           updated_at,
+          active_env,
           merchant_id: merchantId,
           sandbox: {
             configured: Boolean(sandboxClientKey && sandboxServer),
@@ -172,6 +188,26 @@ Deno.serve(async (req) => {
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+
+    if (body.action === "set_active_env") {
+      const env = normalizeEnv((body as any).env);
+
+      const { error: setErr } = await admin
+        .from("website_settings")
+        .upsert({ key: WS_ACTIVE_ENV, value: env }, { onConflict: "key" });
+      if (setErr) throw setErr;
+
+      await writeAuditLog(admin, {
+        actorUserId: String(claimsData.claims.sub),
+        action: "set_setting",
+        provider: "midtrans",
+        metadata: { key: WS_ACTIVE_ENV, env, user_agent: req.headers.get("user-agent") },
+      });
+
+      return new Response(JSON.stringify({ ok: true, active_env: env }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     if (body.action === "reveal") {

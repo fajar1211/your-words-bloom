@@ -12,6 +12,7 @@ type Env = "sandbox" | "production";
 const WS_MERCHANT_ID = "midtrans_merchant_id";
 const WS_CLIENT_KEY_SANDBOX = "midtrans_client_key_sandbox";
 const WS_CLIENT_KEY_PRODUCTION = "midtrans_client_key_production";
+const WS_ACTIVE_ENV = "midtrans_active_env";
 
 async function getWebsiteSetting(admin: any, key: string): Promise<string | null> {
   const { data, error } = await admin.from("website_settings").select("value").eq("key", key).maybeSingle();
@@ -52,12 +53,18 @@ Deno.serve(async (req) => {
     const merchantId = await getWebsiteSetting(admin, WS_MERCHANT_ID);
     const sandboxClientKey = await getWebsiteSetting(admin, WS_CLIENT_KEY_SANDBOX);
     const productionClientKey = await getWebsiteSetting(admin, WS_CLIENT_KEY_PRODUCTION);
+    const activeEnvSetting = await getWebsiteSetting(admin, WS_ACTIVE_ENV);
 
     const sandboxReady = Boolean(sandboxClientKey) && (await hasPlainServerKey(admin, "sandbox"));
     const productionReady = Boolean(productionClientKey) && (await hasPlainServerKey(admin, "production"));
 
-    // Default env: prefer production if configured, otherwise sandbox.
-    const env: Env = productionReady ? "production" : "sandbox";
+    // Prefer admin-selected env; fallback to production if ready, otherwise sandbox.
+    const env: Env =
+      activeEnvSetting === "sandbox" || activeEnvSetting === "production"
+        ? (activeEnvSetting as Env)
+        : productionReady
+          ? "production"
+          : "sandbox";
     const client_key = env === "production" ? productionClientKey : sandboxClientKey;
 
     return new Response(
