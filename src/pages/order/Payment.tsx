@@ -71,7 +71,8 @@ export default function Payment() {
       new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-        maximumFractionDigits: 0,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       }),
     [],
   );
@@ -270,9 +271,9 @@ export default function Payment() {
               <p className="font-medium text-foreground">Price breakdown</p>
               <dl className="mt-3 grid gap-2">
                 <div className="flex items-center justify-between gap-4">
-                  <dt className="text-muted-foreground">Price</dt>
+                  <dt className="text-muted-foreground">Amount</dt>
                   <dd className="font-medium text-foreground">
-                    {totalAfterPromoUsd == null ? "—" : `${usdFormatter.format(totalAfterPromoUsd)} USD`}
+                    {totalAfterPromoUsd == null ? "—" : usdFormatter.format(totalAfterPromoUsd)}
                   </dd>
                 </div>
               </dl>
