@@ -26,7 +26,7 @@ export default function Home() {
   });
   return <PublicLayout>
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32 min-h-[calc(100vh-5rem)] flex items-center">
+      <section className="relative py-20 md:py-32 min-h-[calc(100vh-5rem)] flex items-center">
         {/* Background Image + Overlay */}
         <div className="absolute inset-0 -z-10">
           <img
