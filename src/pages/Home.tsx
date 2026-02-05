@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PublicLayout } from "@/components/layout/PublicLayout";
@@ -9,19 +8,22 @@ import { DomainSearchBar } from "@/components/order/DomainSearchBar";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useI18n } from "@/hooks/useI18n";
 import { getHomeContent } from "@/pages/home/homeContent";
-
 export default function Home() {
   const navigate = useNavigate();
-  const { lang, t } = useI18n();
-  const { steps, whoItsFor, services } = getHomeContent(lang);
-
+  const {
+    lang,
+    t
+  } = useI18n();
+  const {
+    steps,
+    whoItsFor,
+    services
+  } = getHomeContent(lang);
   usePageSeo("home", {
     title: t("home.seoTitle"),
-    description: t("home.seoDesc"),
+    description: t("home.seoDesc")
   });
-
-  return (
-    <PublicLayout>
+  return <PublicLayout>
       {/* Hero Section */}
       <section className="relative overflow-hidden gradient-hero py-20 md:py-32 min-h-[calc(100vh-5rem)] flex items-center">
         {/* Promo banner overlays the hero (does not push content down) */}
@@ -31,40 +33,35 @@ export default function Home() {
 
         <div className="container relative z-10">
           {/* Offset hero content by banner height so nothing is covered on any breakpoint */}
-          <div
-            className="mx-auto max-w-3xl text-center"
-            style={{ paddingTop: "calc(var(--homepage-promo-height, 0px) + clamp(0.002125rem, 0.0105vh, 0.00625rem))" }}
-          >
+          <div className="mx-auto max-w-3xl text-center" style={{
+          paddingTop: "calc(var(--homepage-promo-height, 0px) + clamp(0.002125rem, 0.0105vh, 0.00625rem))"
+        }}>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground animate-fade-in">
               <span className="block">{t("home.h1a")}</span>
               <span className="block text-gradient">{t("home.h1b")}</span>
             </h1>
 
-            <p
-              className="mt-4 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in"
-              style={{ animationDelay: "0.1s" }}
-            >
+            <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in my-[14px]" style={{
+            animationDelay: "0.1s"
+          }}>
               {t("home.heroSub")}
             </p>
 
-            <div className="mt-6 mx-auto max-w-2xl animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              <DomainSearchBar
-                onSubmit={(domain) => {
-                  navigate(`/order/choose-domain?domain=${encodeURIComponent(domain)}`);
-                }}
-              />
+            <div className="mt-6 mx-auto max-w-2xl animate-fade-in" style={{
+            animationDelay: "0.2s"
+          }}>
+              <DomainSearchBar onSubmit={domain => {
+              navigate(`/order/choose-domain?domain=${encodeURIComponent(domain)}`);
+            }} />
             </div>
 
-            <div
-              className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground animate-fade-in"
-              style={{ animationDelay: "0.3s" }}
-            >
-              {[t("home.heroPill1"), t("home.heroPill2"), t("home.heroPill3")].map((item) => (
-                <div key={item} className="flex items-center gap-2">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground animate-fade-in" style={{
+            animationDelay: "0.3s"
+          }}>
+              {[t("home.heroPill1"), t("home.heroPill2"), t("home.heroPill3")].map(item => <div key={item} className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-accent" />
                   <span>{item}</span>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </div>
@@ -81,22 +78,16 @@ export default function Home() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            {steps.map((item, index) => (
-              <div
-                key={item.step}
-                className="relative text-center animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+            {steps.map((item, index) => <div key={item.step} className="relative text-center animate-fade-in" style={{
+            animationDelay: `${index * 0.1}s`
+          }}>
                 <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-2xl font-bold text-primary mb-6">
                   {item.step}
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[60%] w-[80%] border-t-2 border-dashed border-border" />
-                )}
-              </div>
-            ))}
+                {index < steps.length - 1 && <div className="hidden md:block absolute top-8 left-[60%] w-[80%] border-t-2 border-dashed border-border" />}
+              </div>)}
           </div>
         </div>
       </section>
@@ -110,12 +101,9 @@ export default function Home() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {whoItsFor.map((item, index) => (
-              <Card
-                key={item.title}
-                className="border-0 shadow-soft bg-card animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+            {whoItsFor.map((item, index) => <Card key={item.title} className="border-0 shadow-soft bg-card animate-fade-in" style={{
+            animationDelay: `${index * 0.1}s`
+          }}>
                 <CardContent className="pt-8 pb-8 text-center">
                   <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 text-accent mb-6">
                     <item.icon className="h-7 w-7" />
@@ -123,8 +111,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold text-foreground mb-3">{item.title}</h3>
                   <p className="text-muted-foreground">{item.description}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -138,12 +125,9 @@ export default function Home() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {services.map((service, index) => (
-              <Card
-                key={service.title}
-                className="group hover:shadow-glow transition-all duration-300 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+            {services.map((service, index) => <Card key={service.title} className="group hover:shadow-glow transition-all duration-300 animate-fade-in" style={{
+            animationDelay: `${index * 0.1}s`
+          }}>
                 <CardContent className="pt-8 pb-8">
                   <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <service.icon className="h-6 w-6" />
@@ -151,8 +135,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold text-foreground mb-3">{service.title}</h3>
                   <p className="text-muted-foreground">{service.description}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
 
           <div className="mt-12 text-center">
@@ -179,18 +162,12 @@ export default function Home() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                asChild
-              >
+              <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" asChild>
                 <Link to="/contact">{t("home.ctaContact")}</Link>
               </Button>
             </div>
           </div>
         </div>
       </section>
-    </PublicLayout>
-  );
+    </PublicLayout>;
 }
