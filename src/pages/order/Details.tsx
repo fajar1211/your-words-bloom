@@ -11,14 +11,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { OrderLayout } from "@/components/order/OrderLayout";
 import { OrderSummaryCard } from "@/components/order/OrderSummaryCard";
 import { countries } from "@/data/countries";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOrder } from "@/contexts/OrderContext";
+import { useI18n } from "@/hooks/useI18n";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -32,6 +27,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function Details() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { state, setDetails } = useOrder();
 
   const defaultValues = useMemo<FormValues>(
@@ -51,10 +47,10 @@ export default function Details() {
   });
 
   return (
-    <OrderLayout title="Your Details" step="details" sidebar={<OrderSummaryCard showEstPrice={false} />}>
+    <OrderLayout title={t("order.step.details")} step="details" sidebar={<OrderSummaryCard showEstPrice={false} />}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Contact information</CardTitle>
+          <CardTitle className="text-base">{t("order.contactInfo")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -71,7 +67,7 @@ export default function Details() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t("order.name")}</FormLabel>
                       <FormControl>
                         <Input {...field} autoComplete="name" />
                       </FormControl>
@@ -85,7 +81,7 @@ export default function Details() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t("order.email")}</FormLabel>
                       <FormControl>
                         <Input {...field} autoComplete="email" />
                       </FormControl>
@@ -101,11 +97,11 @@ export default function Details() {
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country</FormLabel>
+                      <FormLabel>{t("order.country")}</FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select country" />
+                            <SelectValue placeholder={t("order.selectCountry")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -126,7 +122,7 @@ export default function Details() {
                   name="company"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company (optional)</FormLabel>
+                      <FormLabel>{t("order.companyOptional")}</FormLabel>
                       <FormControl>
                         <Input {...field} autoComplete="organization" />
                       </FormControl>
@@ -144,8 +140,8 @@ export default function Details() {
                     <div className="flex items-start gap-3 rounded-lg border p-4">
                       <Checkbox checked={field.value} onCheckedChange={(v) => field.onChange(Boolean(v))} />
                       <div className="space-y-1">
-                        <FormLabel className="leading-none">I agree to the terms</FormLabel>
-                        <p className="text-sm text-muted-foreground">You can update details later in dashboard.</p>
+                        <FormLabel className="leading-none">{t("order.termsAgree")}</FormLabel>
+                        <p className="text-sm text-muted-foreground">{t("order.updateLater")}</p>
                         <FormMessage />
                       </div>
                     </div>
@@ -155,10 +151,10 @@ export default function Details() {
 
               <div className="flex items-center justify-between gap-3">
                 <Button type="button" variant="outline" onClick={() => navigate("/order/choose-design")}>
-                  Back
+                  {t("common.back")}
                 </Button>
                 <Button type="submit" size="lg">
-                  Continue to Subscription
+                  {t("order.continueSubscription")}
                 </Button>
               </div>
             </form>
@@ -168,3 +164,4 @@ export default function Details() {
     </OrderLayout>
   );
 }
+

@@ -1,72 +1,23 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Users, Briefcase, TrendingUp, Sparkles, Globe, MessageCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { PublicLayout } from '@/components/layout/PublicLayout';
-import { HomePromoBanner } from '@/components/home/HomePromoBanner';
-import { DomainSearchBar } from '@/components/order/DomainSearchBar';
-import { usePageSeo } from '@/hooks/usePageSeo';
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, CheckCircle } from "lucide-react";
 
-const steps = [
-  {
-    step: '01',
-    title: 'Choose Your Package',
-    description: 'Pick the marketing assistance that fits your business needs and budget.',
-  },
-  {
-    step: '02',
-    title: 'Get Your Dedicated Assist',
-    description: 'You\'ll be matched with a marketing assist who understands your goals.',
-  },
-  {
-    step: '03',
-    title: 'Watch Your Business Grow',
-    description: 'Sit back while your assist handles the marketing, keeping you updated every step.',
-  },
-];
-
-const whoItsFor = [
-  {
-    icon: Briefcase,
-    title: 'New Business Owners',
-    description: 'Just starting out and need help getting online presence established.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Growing Businesses',
-    description: 'Ready to scale but don\'t have time for marketing tasks.',
-  },
-  {
-    icon: Users,
-    title: 'Solo Entrepreneurs',
-    description: 'Wearing too many hats and need reliable marketing support.',
-  },
-];
-
-const services = [
-  {
-    icon: Globe,
-    title: 'Google Business Profile',
-    description: 'Get found locally with optimized GMB setup and management.',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Social Media Posting',
-    description: 'Consistent, engaging posts that build your brand presence.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Website Development',
-    description: 'Beautiful, fast websites that convert visitors into customers.',
-  },
-];
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PublicLayout } from "@/components/layout/PublicLayout";
+import { HomePromoBanner } from "@/components/home/HomePromoBanner";
+import { DomainSearchBar } from "@/components/order/DomainSearchBar";
+import { usePageSeo } from "@/hooks/usePageSeo";
+import { useI18n } from "@/hooks/useI18n";
+import { getHomeContent } from "@/pages/home/homeContent";
 
 export default function Home() {
   const navigate = useNavigate();
+  const { lang, t } = useI18n();
+  const { steps, whoItsFor, services } = getHomeContent(lang);
 
   usePageSeo("home", {
-    title: "EasyMarketingAssist | Easy Digital Marketing",
-    description: "Search a domain and get a professional website in minutes.",
+    title: t("home.seoTitle"),
+    description: t("home.seoDesc"),
   });
 
   return (
@@ -85,22 +36,29 @@ export default function Home() {
             style={{ paddingTop: "calc(var(--homepage-promo-height, 0px) + clamp(3rem, 8vh, 5rem))" }}
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground animate-fade-in">
-              Easy Digital Marketing for{' '}
-              <span className="text-gradient">Busy Business Owners</span>
+              {t("home.h1a")} <span className="text-gradient">{t("home.h1b")}</span>
             </h1>
-              <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                Search a domain and get a professional website in minutes.
-              </p>
 
-              <div className="mt-10 mx-auto max-w-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                <DomainSearchBar
-                  onSubmit={(domain) => {
-                    navigate(`/order/choose-domain?domain=${encodeURIComponent(domain)}`);
-                  }}
-                />
-              </div>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              {['No contracts', 'Personal support', 'Affordable pricing'].map((item) => (
+            <p
+              className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in"
+              style={{ animationDelay: "0.1s" }}
+            >
+              {t("home.heroSub")}
+            </p>
+
+            <div className="mt-10 mx-auto max-w-2xl animate-fade-in" style={{ animationDelay: "0.2s" }}>
+              <DomainSearchBar
+                onSubmit={(domain) => {
+                  navigate(`/order/choose-domain?domain=${encodeURIComponent(domain)}`);
+                }}
+              />
+            </div>
+
+            <div
+              className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground animate-fade-in"
+              style={{ animationDelay: "0.3s" }}
+            >
+              {[t("home.heroPill1"), t("home.heroPill2"), t("home.heroPill3")].map((item) => (
                 <div key={item} className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-accent" />
                   <span>{item}</span>
@@ -109,6 +67,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_40%_at_50%_60%,hsl(var(--primary)/0.1),transparent)]" />
       </section>
 
@@ -116,13 +75,10 @@ export default function Home() {
       <section className="py-20 md:py-28">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              How It Works
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Getting started is simple. Here's how we'll work together.
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("home.howItWorks")}</h2>
+            <p className="mt-4 text-lg text-muted-foreground">{t("home.howItWorksSub")}</p>
           </div>
+
           <div className="grid gap-8 md:grid-cols-3">
             {steps.map((item, index) => (
               <div
@@ -148,13 +104,10 @@ export default function Home() {
       <section className="py-20 md:py-28 bg-muted/50">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Who It's For
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Perfect for business owners who want to focus on what they do best.
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("home.whoItsFor")}</h2>
+            <p className="mt-4 text-lg text-muted-foreground">{t("home.whoItsForSub")}</p>
           </div>
+
           <div className="grid gap-6 md:grid-cols-3">
             {whoItsFor.map((item, index) => (
               <Card
@@ -179,13 +132,10 @@ export default function Home() {
       <section className="py-20 md:py-28">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              What We Can Help With
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Your marketing assist can handle a variety of tasks to grow your business.
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("home.helpWith")}</h2>
+            <p className="mt-4 text-lg text-muted-foreground">{t("home.helpWithSub")}</p>
           </div>
+
           <div className="grid gap-6 md:grid-cols-3">
             {services.map((service, index) => (
               <Card
@@ -203,10 +153,11 @@ export default function Home() {
               </Card>
             ))}
           </div>
+
           <div className="mt-12 text-center">
             <Button size="lg" variant="outline" asChild>
               <Link to="/services">
-                View All Services
+                {t("home.viewAllServices")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -218,21 +169,22 @@ export default function Home() {
       <section className="py-20 md:py-28 bg-primary">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
-              Ready to Grow Your Business?
-            </h2>
-            <p className="mt-4 text-lg text-primary-foreground/80">
-              Get your dedicated marketing assist today. No contracts, no agency overhead.
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">{t("home.ctaTitle")}</h2>
+            <p className="mt-4 text-lg text-primary-foreground/80">{t("home.ctaSub")}</p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
                 <Link to="/packages">
-                  View Packages
+                  {t("home.ctaPackages")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" asChild>
-                <Link to="/contact">Contact Us</Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                asChild
+              >
+                <Link to="/contact">{t("home.ctaContact")}</Link>
               </Button>
             </div>
           </div>

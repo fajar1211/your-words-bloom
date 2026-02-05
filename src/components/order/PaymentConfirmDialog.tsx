@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/useI18n";
 
 type PaymentConfirmDialogProps = {
   open: boolean;
@@ -30,23 +31,25 @@ export function PaymentConfirmDialog({
   disabled,
   confirming,
   onConfirm,
-  triggerText = "Pay",
-  confirmText = "Confirm & Pay",
+  triggerText,
+  confirmText,
   note,
 }: PaymentConfirmDialogProps) {
+  const { t } = useI18n();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild>
         <Button type="button" size="lg" disabled={disabled}>
-          {triggerText}
+          {triggerText ?? t("order.pay")}
         </Button>
       </AlertDialogTrigger>
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirm payment</AlertDialogTitle>
+          <AlertDialogTitle>{t("order.confirmPayment")}</AlertDialogTitle>
           <AlertDialogDescription>
-            Amount: <span className="font-medium text-foreground">{amountUsdFormatted}</span>
+            {t("order.amount")}: <span className="font-medium text-foreground">{amountUsdFormatted}</span>
             {note ? (
               <>
                 <br />
@@ -57,7 +60,7 @@ export function PaymentConfirmDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={confirming}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={confirming}>{t("order.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
@@ -65,10 +68,11 @@ export function PaymentConfirmDialog({
             }}
             disabled={confirming || disabled}
           >
-            {confirming ? "Processing..." : confirmText}
+            {confirming ? t("order.processing") : (confirmText ?? t("order.confirmAndPay"))}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
 }
+

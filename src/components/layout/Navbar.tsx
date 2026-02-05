@@ -4,13 +4,53 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useWebsiteLayoutSettings } from "@/hooks/useWebsiteLayout";
+import { useI18n } from "@/hooks/useI18n";
+
+function translateNavLabel(label: string, href: string, lang: "id" | "en", t: (k: any) => string) {
+  // Prefer translating based on route, so admin settings can remain EN while UI switches.
+  const byHref: Record<string, { id: string; en: string }> = {
+    "/": { id: t("nav.home"), en: t("nav.home") },
+    "/services": { id: t("nav.services"), en: t("nav.services") },
+    "/packages": { id: t("nav.packages"), en: t("nav.packages") },
+    "/blog": { id: t("nav.blog"), en: t("nav.blog") },
+    "/about": { id: t("nav.about"), en: t("nav.about") },
+    "/contact": { id: t("nav.contact"), en: t("nav.contact") },
+  };
+
+  if (byHref[href]) return lang === "id" ? byHref[href].id : byHref[href].en;
+
+  // Fallback: translate well-known labels if they match defaults.
+  const normalized = label.trim().toLowerCase();
+  const byLabel: Record<string, string> = {
+    home: t("nav.home"),
+    services: t("nav.services"),
+    packages: t("nav.packages"),
+    blog: t("nav.blog"),
+    "about us": t("nav.about"),
+    contact: t("nav.contact"),
+  };
+  return byLabel[normalized] ?? label;
+}
 
 export function Navbar() {
   const { settings } = useWebsiteLayoutSettings();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { lang, setLang, t } = useI18n();
 
   const navLinks = useMemo(() => settings.header.navLinks ?? [], [settings.header.navLinks]);
+
+  const primaryCtaLabel = useMemo(() => {
+    const raw = settings.header.primaryCtaLabel;
+    if (raw.trim().toLowerCase() === "get started") return t("nav.getStarted");
+    return raw;
+  }, [settings.header.primaryCtaLabel, t]);
+
+  const secondaryCtaLabel = useMemo(() => {
+    const raw = settings.header.secondaryCtaLabel;
+    if (raw.trim().toLowerCase() === "login") return t("nav.login");
+    return raw;
+  }, [settings.header.secondaryCtaLabel, t]);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -41,22 +81,28 @@ export function Navbar() {
               to={link.href}
               className={cn(
                 "px-4 py-2 text-sm font-medium transition-colors rounded-md hover:bg-muted",
-                location.pathname === link.href
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                location.pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {link.label}
+              {translateNavLabel(link.label, link.href, lang, t)}
             </Link>
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2 lg:flex">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLang(lang === "id" ? "en" : "id")}
+            aria-label="Toggle language"
+          >
+            {lang === "id" ? t("lang.en") : t("lang.id")}
+          </Button>
           <Button variant="ghost" asChild>
-            <Link to={settings.header.secondaryCtaHref}>{settings.header.secondaryCtaLabel}</Link>
+            <Link to={settings.header.secondaryCtaHref}>{secondaryCtaLabel}</Link>
           </Button>
           <Button asChild>
-            <Link to={settings.header.primaryCtaHref}>{settings.header.primaryCtaLabel}</Link>
+            <Link to={settings.header.primaryCtaHref}>{primaryCtaLabel}</Link>
           </Button>
         </div>
 
@@ -74,6 +120,18 @@ export function Navbar() {
       {isOpen && (
         <div className="border-t border-border bg-background lg:hidden animate-fade-in">
           <div className="container py-4 space-y-2">
+            <div className="flex items-center justify-between gap-3 px-4">
+              <p className="text-sm font-medium text-foreground">{settings.header.brandName}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLang(lang === "id" ? "en" : "id")}
+                aria-label="Toggle language"
+              >
+                {lang === "id" ? t("lang.en") : t("lang.id")}
+              </Button>
+            </div>
+
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -83,21 +141,21 @@ export function Navbar() {
                   "block px-4 py-2 text-sm font-medium rounded-md transition-colors",
                   location.pathname === link.href
                     ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
-                {link.label}
+                {translateNavLabel(link.label, link.href, lang, t)}
               </Link>
             ))}
             <div className="pt-4 border-t border-border space-y-2">
               <Button variant="outline" className="w-full" asChild>
                 <Link to={settings.header.secondaryCtaHref} onClick={() => setIsOpen(false)}>
-                  {settings.header.secondaryCtaLabel}
+                  {secondaryCtaLabel}
                 </Link>
               </Button>
               <Button className="w-full" asChild>
                 <Link to={settings.header.primaryCtaHref} onClick={() => setIsOpen(false)}>
-                  {settings.header.primaryCtaLabel}
+                  {primaryCtaLabel}
                 </Link>
               </Button>
             </div>

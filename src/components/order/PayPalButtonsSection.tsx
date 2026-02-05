@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/useI18n";
 
 declare global {
   interface Window {
@@ -29,6 +30,7 @@ type Props = {
 };
 
 export function PayPalButtonsSection({ disabled, payload, onOrderDbId, onSuccess, onError }: Props) {
+  const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdMapRef = useRef<Record<string, string>>({});
   const [sdkReady, setSdkReady] = useState(false);
@@ -44,14 +46,14 @@ export function PayPalButtonsSection({ disabled, payload, onOrderDbId, onSuccess
       return;
     }
 
-    const t = window.setInterval(() => {
+    const tmr = window.setInterval(() => {
       if (typeof window.paypal?.Buttons === "function") {
-        window.clearInterval(t);
+        window.clearInterval(tmr);
         setSdkReady(true);
       }
     }, 250);
 
-    return () => window.clearInterval(t);
+    return () => window.clearInterval(tmr);
   }, []);
 
   useEffect(() => {
@@ -117,22 +119,21 @@ export function PayPalButtonsSection({ disabled, payload, onOrderDbId, onSuccess
   }, [canRender, onError, onOrderDbId, onSuccess, payload, sdkReady]);
 
   if (!sdkReady) {
-    return <div className="text-sm text-muted-foreground">Memuat PayPal…</div>;
+    return <div className="text-sm text-muted-foreground">{t("order.paypalLoading")}</div>;
   }
 
   if (!canRender) {
-    return (
-      <div className="rounded-lg border p-4 text-sm text-muted-foreground">
-        PayPal belum bisa dipakai. Pastikan domain, template, dan total sudah siap.
-      </div>
-    );
+    return <div className="rounded-lg border p-4 text-sm text-muted-foreground">{t("order.paypalNotReady")}</div>;
   }
 
   return (
     <div className="space-y-3">
       {renderError ? <div className="text-sm text-destructive">{renderError}</div> : null}
       <div ref={containerRef} />
-      <Button type="button" variant="outline" onClick={() => onError?.("Canceled")}>Cancel</Button>
+      <Button type="button" variant="outline" onClick={() => onError?.("Canceled")}>
+        {t("order.cancel")}
+      </Button>
     </div>
   );
 }
+

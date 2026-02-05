@@ -1,9 +1,24 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useWebsiteLayoutSettings } from "@/hooks/useWebsiteLayout";
+import { useI18n } from "@/hooks/useI18n";
+
+function translateFooterLinkLabel(label: string, href: string, t: (k: any) => string) {
+  const byHref: Record<string, string> = {
+    "/services": t("nav.services"),
+    "/packages": t("nav.packages"),
+    "/blog": t("nav.blog"),
+    "/about": t("nav.about"),
+    "/contact": t("nav.contact"),
+    "/": t("nav.home"),
+  };
+
+  return byHref[href] ?? label;
+}
 
 export function Footer() {
   const { settings } = useWebsiteLayoutSettings();
+  const { t } = useI18n();
 
   return (
     <footer className="bg-navy text-sidebar-foreground">
@@ -26,11 +41,8 @@ export function Footer() {
             <ul className="space-y-2">
               {(settings.footer.quickLinks ?? []).map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-sidebar-foreground/70 hover:text-primary transition-colors"
-                  >
-                    {link.label}
+                  <Link to={link.href} className="text-sm text-sidebar-foreground/70 hover:text-primary transition-colors">
+                    {translateFooterLinkLabel(link.label, link.href, t)}
                   </Link>
                 </li>
               ))}
@@ -71,15 +83,13 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-sidebar-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-sidebar-foreground/60">
-              © {new Date().getFullYear()} {settings.footer.copyrightText}
-            </p>
+            <p className="text-sm text-sidebar-foreground/60">© {new Date().getFullYear()} {settings.footer.copyrightText}</p>
             <div className="flex gap-6">
               <Link to={settings.footer.privacyHref} className="text-sm text-sidebar-foreground/60 hover:text-primary transition-colors">
-                Privacy Policy
+                {t("footer.privacy")}
               </Link>
               <Link to={settings.footer.termsHref} className="text-sm text-sidebar-foreground/60 hover:text-primary transition-colors">
-                Terms of Service
+                {t("footer.terms")}
               </Link>
             </div>
           </div>

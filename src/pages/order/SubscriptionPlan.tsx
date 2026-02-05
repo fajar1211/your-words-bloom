@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useOrder } from "@/contexts/OrderContext";
 import { useOrderPublicSettings } from "@/hooks/useOrderPublicSettings";
+import { useI18n } from "@/hooks/useI18n";
 
 function formatUsd(value: number) {
   try {
@@ -20,6 +21,7 @@ function formatUsd(value: number) {
 
 export default function SubscriptionPlan() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { state, setSubscriptionYears } = useOrder();
   const { pricing, subscriptionPlans } = useOrderPublicSettings(state.domain);
 
@@ -47,19 +49,17 @@ export default function SubscriptionPlan() {
   const selected = state.subscriptionYears;
 
   return (
-    <OrderLayout title="Subscription Plan" step="plan" sidebar={<OrderSummaryCard />}>
+    <OrderLayout title={t("order.step.plan")} step="plan" sidebar={<OrderSummaryCard />}>
       <div className="space-y-6">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Choose plan duration</CardTitle>
+            <CardTitle className="text-base">{t("order.chooseDuration")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Includes domain, hosting, and website template costs.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("order.includesCosts")}</p>
 
             <div className="grid gap-3 sm:grid-cols-3">
-               {options.map((opt) => {
+              {options.map((opt) => {
                 const isSelected = selected === opt.years;
                 return (
                   <button
@@ -68,45 +68,36 @@ export default function SubscriptionPlan() {
                     onClick={() => setSubscriptionYears(opt.years)}
                     className={cn(
                       "w-full rounded-xl border bg-card p-4 text-left shadow-soft transition will-change-transform",
-                      isSelected
-                        ? "ring-2 ring-ring bg-accent/30 shadow-lg scale-[1.01]"
-                        : "hover:bg-muted/30 hover:shadow",
+                      isSelected ? "ring-2 ring-ring bg-accent/30 shadow-lg scale-[1.01]" : "hover:bg-muted/30 hover:shadow",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-base font-semibold text-foreground">{opt.label ?? `${opt.years} Years`}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">All-in (domain + hosting + template)</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{t("order.allIn")}</p>
                       </div>
-                      {isSelected ? <Badge variant="secondary">Selected</Badge> : <Badge variant="outline">Plan</Badge>}
+                      {isSelected ? <Badge variant="secondary">{t("order.selected")}</Badge> : <Badge variant="outline">Plan</Badge>}
                     </div>
 
                     <div className="mt-4">
-                      <p className="text-2xl font-bold text-foreground">
-                        {opt.totalUsd == null ? "—" : formatUsd(opt.totalUsd)}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">Total for {opt.years} year(s)</p>
+                      <p className="text-2xl font-bold text-foreground">{opt.totalUsd == null ? "—" : formatUsd(opt.totalUsd)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{t("order.totalFor", { years: opt.years })}</p>
                     </div>
                   </button>
                 );
               })}
             </div>
 
-            {pricing.packagePriceUsd == null ? (
-              <p className="text-xs text-muted-foreground">
-                Note: hosting and template pricing follows the <span className="font-medium text-foreground">Default Package</span> in
-                Domain Tools.
-              </p>
-            ) : null}
+            {pricing.packagePriceUsd == null ? <p className="text-xs text-muted-foreground">{t("order.noteDefaultPackage")}</p> : null}
           </CardContent>
         </Card>
 
         <div className="flex items-center justify-between gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/order/details")}>
-            Back
+            {t("common.back")}
           </Button>
           <Button type="button" size="lg" disabled={!selected} onClick={() => navigate("/order/payment")}>
-            Continue to Payment
+            {t("order.continuePayment")}
           </Button>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { OrderSummaryCard } from "@/components/order/OrderSummaryCard";
 import { useOrder } from "@/contexts/OrderContext";
 import { useDomainDuckCheck, type DomainDuckAvailability } from "@/hooks/useDomainDuckCheck";
 import { useOrderPublicSettings } from "@/hooks/useOrderPublicSettings";
+import { useI18n } from "@/hooks/useI18n";
 
 type DomainStatus = "available" | "unavailable" | "premium" | "blocked" | "unknown";
 
@@ -26,6 +27,7 @@ function formatUsd(value: number) {
 
 export default function ChooseDomain() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [params] = useSearchParams();
   const initial = params.get("domain") ?? "";
   const { state, setDomain, setDomainStatus } = useOrder();
@@ -58,11 +60,7 @@ export default function ChooseDomain() {
   const canContinue = Boolean(lastChecked) && status !== "unavailable";
 
   return (
-    <OrderLayout
-      title="Choose Domain"
-      step="domain"
-      sidebar={<OrderSummaryCard showEstPrice={false} />}
-    >
+    <OrderLayout title={t("order.step.domain")} step="domain" sidebar={<OrderSummaryCard showEstPrice={false} />}>
       <div className="space-y-6">
         <DomainSearchBar
           initialValue={initial}
@@ -74,20 +72,20 @@ export default function ChooseDomain() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Domain result</CardTitle>
+            <CardTitle className="text-base">{t("order.domainResult")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {!lastChecked ? (
-              <p className="text-sm text-muted-foreground">Search to check availability</p>
+              <p className="text-sm text-muted-foreground">{t("order.searchToCheck")}</p>
             ) : (
               <>
                 <div className="overflow-hidden rounded-lg border">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/40">
                       <tr>
-                        <th className="px-3 py-2 text-left font-medium text-foreground">Domain</th>
-                        <th className="px-3 py-2 text-left font-medium text-foreground">Status</th>
-                        <th className="px-3 py-2 text-left font-medium text-foreground">Price</th>
+                        <th className="px-3 py-2 text-left font-medium text-foreground">{t("order.table.domain")}</th>
+                        <th className="px-3 py-2 text-left font-medium text-foreground">{t("order.table.status")}</th>
+                        <th className="px-3 py-2 text-left font-medium text-foreground">{t("order.table.price")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -95,8 +93,8 @@ export default function ChooseDomain() {
                         <td className="px-3 py-2 font-medium text-foreground">{lastChecked}</td>
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-2">
-                            <Badge variant={badgeVariant(status ?? "unknown")}>{
-                              status === "available"
+                            <Badge variant={badgeVariant(status ?? "unknown")}>
+                              {status === "available"
                                 ? "Available"
                                 : status === "unavailable"
                                   ? "Unavailable"
@@ -106,8 +104,8 @@ export default function ChooseDomain() {
                                       ? "Not Available"
                                       : loading
                                         ? "Checking…"
-                                        : "Unknown"
-                            }</Badge>
+                                        : "Unknown"}
+                            </Badge>
                           </div>
                         </td>
                         <td className="px-3 py-2">
@@ -115,12 +113,8 @@ export default function ChooseDomain() {
                             <span className="text-muted-foreground">—</span>
                           ) : (
                             <div className="flex flex-col items-start">
-                              <span className="text-base font-semibold text-foreground">
-                                {formatUsd(pricing.domainPriceUsd)}
-                              </span>
-                              <span className="text-xs text-muted-foreground line-through">
-                                {formatUsd(pricing.domainPriceUsd * 1.25)}
-                              </span>
+                              <span className="text-base font-semibold text-foreground">{formatUsd(pricing.domainPriceUsd)}</span>
+                              <span className="text-xs text-muted-foreground line-through">{formatUsd(pricing.domainPriceUsd * 1.25)}</span>
                             </div>
                           )}
                         </td>
@@ -130,9 +124,7 @@ export default function ChooseDomain() {
                 </div>
 
                 {error ? <p className="text-sm text-destructive">{error}</p> : null}
-                <p className="text-xs text-muted-foreground">
-                  Powered by DomainDuck API. (WHOIS & RDAP tidak ditampilkan di Find Domain)
-                </p>
+                <p className="text-xs text-muted-foreground">Powered by DomainDuck API. (WHOIS & RDAP tidak ditampilkan di Find Domain)</p>
               </>
             )}
           </CardContent>
@@ -150,10 +142,11 @@ export default function ChooseDomain() {
               navigate("/order/choose-design");
             }}
           >
-            Continue to Design
+            {t("order.continueDesign")}
           </Button>
         </div>
       </div>
     </OrderLayout>
   );
 }
+

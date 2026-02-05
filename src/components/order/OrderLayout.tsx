@@ -1,22 +1,17 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
+
+type StepKey = "domain" | "design" | "details" | "plan" | "payment";
 
 type Step = {
-  key: string;
+  key: StepKey;
   label: string;
 };
 
-const steps: Step[] = [
-  { key: "domain", label: "Choose Domain" },
-  { key: "design", label: "Choose Design" },
-  { key: "details", label: "Your Details" },
-  { key: "plan", label: "Subscription Plan" },
-  { key: "payment", label: "Payment" },
-];
-
-function stepIndex(activeKey: Step["key"]) {
+function stepIndex(steps: Step[], activeKey: Step["key"]) {
   const idx = steps.findIndex((s) => s.key === activeKey);
   return idx === -1 ? 0 : idx;
 }
@@ -28,11 +23,24 @@ export function OrderLayout({
   sidebar,
 }: {
   title: string;
-  step: Step["key"];
+  step: StepKey;
   children: ReactNode;
   sidebar: ReactNode | null;
 }) {
-  const active = stepIndex(step);
+  const { t } = useI18n();
+
+  const steps = useMemo<Step[]>(
+    () => [
+      { key: "domain", label: t("order.step.domain") },
+      { key: "design", label: t("order.step.design") },
+      { key: "details", label: t("order.step.details") },
+      { key: "plan", label: t("order.step.plan") },
+      { key: "payment", label: t("order.step.payment") },
+    ],
+    [t],
+  );
+
+  const active = stepIndex(steps, step);
 
   return (
     <PublicLayout>
@@ -66,8 +74,7 @@ export function OrderLayout({
           </div>
         </header>
 
-        <section className={cn("grid gap-6", sidebar ? "lg:grid-cols-[1fr_360px]" : "")}
-        >
+        <section className={cn("grid gap-6", sidebar ? "lg:grid-cols-[1fr_360px]" : "")}>
           <div>{children}</div>
           {sidebar ? <aside className="lg:sticky lg:top-6 h-fit">{sidebar}</aside> : null}
         </section>
@@ -75,3 +82,4 @@ export function OrderLayout({
     </PublicLayout>
   );
 }
+

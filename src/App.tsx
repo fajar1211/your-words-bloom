@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { OrderProvider } from "@/contexts/OrderContext";
+import { I18nProvider } from "@/contexts/I18nContext";
 import { OnboardingGate, OrientationGate } from "@/components/auth/OnboardingGates";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
@@ -58,149 +59,151 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <OrderProvider>
-            <Routes>
-              <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/packages" element={<Packages />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <I18nProvider>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/packages" element={<Packages />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
 
-             {/* Midtrans redirect pages */}
-             <Route path="/payment/success" element={<PaymentSuccess />} />
-             <Route path="/payment/pending" element={<PaymentPending />} />
-             <Route path="/payment/error" element={<PaymentError />} />
+                {/* Midtrans redirect pages */}
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/pending" element={<PaymentPending />} />
+                <Route path="/payment/error" element={<PaymentError />} />
 
-            {/* Super Admin */}
-            <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-            <Route path="/super-admin/impersonate" element={<SuperAdminImpersonate />} />
-            <Route path="/dashboard/super-admin/*" element={<SuperAdminDashboard />} />
+                {/* Super Admin */}
+                <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+                <Route path="/super-admin/impersonate" element={<SuperAdminImpersonate />} />
+                <Route path="/dashboard/super-admin/*" element={<SuperAdminDashboard />} />
 
-            {/* Admin Operasional */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/dashboard/admin/*" element={<AdminDashboard />} />
-            <Route
-              path="/onboarding/welcome"
-              element={
-                <OnboardingGate>
-                  <Welcome />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/get-started"
-              element={
-                <OnboardingGate>
-                  <GetStarted />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/business-stage"
-              element={
-                <OnboardingGate>
-                  <BusinessStage />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/business-basics"
-              element={
-                <OnboardingGate>
-                  <BusinessBasics />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/online-presence"
-              element={
-                <OnboardingGate>
-                  <OnlinePresence />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/setup-new"
-              element={
-                <OnboardingGate>
-                  <SetupNew />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/setup-growing"
-              element={
-                <OnboardingGate>
-                  <SetupGrowing />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/recommended-package"
-              element={
-                <OnboardingGate>
-                  <RecommendedPackage />
-                </OnboardingGate>
-              }
-            />
-            <Route
-              path="/onboarding/select-package"
-              element={
-                <OnboardingGate>
-                  <SelectPackage />
-                </OnboardingGate>
-              }
-            />
-            {/* Orientation (Assist onboarding) */}
-            <Route
-              path="/orientation/welcome"
-              element={
-                <OrientationGate>
-                  <OrientationWelcome />
-                </OrientationGate>
-              }
-            />
-            <Route
-              path="/orientation/profile"
-              element={
-                <OrientationGate>
-                  <OrientationProfile />
-                </OrientationGate>
-              }
-            />
-            <Route
-              path="/orientation/skills"
-              element={
-                <OrientationGate>
-                  <OrientationSkills />
-                </OrientationGate>
-              }
-            />
-            <Route
-              path="/orientation/portfolio"
-              element={
-                <OrientationGate>
-                  <OrientationPortfolio />
-                </OrientationGate>
-              }
-            />
-            <Route path="/dashboard/user/*" element={<UserDashboard />} />
-            <Route path="/dashboard/assist/*" element={<AssistDashboard />} />
+                {/* Admin Operasional */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/dashboard/admin/*" element={<AdminDashboard />} />
+                <Route
+                  path="/onboarding/welcome"
+                  element={
+                    <OnboardingGate>
+                      <Welcome />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/get-started"
+                  element={
+                    <OnboardingGate>
+                      <GetStarted />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/business-stage"
+                  element={
+                    <OnboardingGate>
+                      <BusinessStage />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/business-basics"
+                  element={
+                    <OnboardingGate>
+                      <BusinessBasics />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/online-presence"
+                  element={
+                    <OnboardingGate>
+                      <OnlinePresence />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/setup-new"
+                  element={
+                    <OnboardingGate>
+                      <SetupNew />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/setup-growing"
+                  element={
+                    <OnboardingGate>
+                      <SetupGrowing />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/recommended-package"
+                  element={
+                    <OnboardingGate>
+                      <RecommendedPackage />
+                    </OnboardingGate>
+                  }
+                />
+                <Route
+                  path="/onboarding/select-package"
+                  element={
+                    <OnboardingGate>
+                      <SelectPackage />
+                    </OnboardingGate>
+                  }
+                />
+                {/* Orientation (Assist onboarding) */}
+                <Route
+                  path="/orientation/welcome"
+                  element={
+                    <OrientationGate>
+                      <OrientationWelcome />
+                    </OrientationGate>
+                  }
+                />
+                <Route
+                  path="/orientation/profile"
+                  element={
+                    <OrientationGate>
+                      <OrientationProfile />
+                    </OrientationGate>
+                  }
+                />
+                <Route
+                  path="/orientation/skills"
+                  element={
+                    <OrientationGate>
+                      <OrientationSkills />
+                    </OrientationGate>
+                  }
+                />
+                <Route
+                  path="/orientation/portfolio"
+                  element={
+                    <OrientationGate>
+                      <OrientationPortfolio />
+                    </OrientationGate>
+                  }
+                />
+                <Route path="/dashboard/user/*" element={<UserDashboard />} />
+                <Route path="/dashboard/assist/*" element={<AssistDashboard />} />
 
-            {/* Order flow */}
-            <Route path="/order/choose-domain" element={<ChooseDomain />} />
-            <Route path="/order/choose-design" element={<ChooseDesign />} />
-            <Route path="/order/details" element={<Details />} />
-            <Route path="/order/subscription" element={<SubscriptionPlan />} />
-            <Route path="/order/payment" element={<Payment />} />
-            
-            {/* Explicit 404 route (dipakai untuk redirect akses tanpa login) */}
-            <Route path="/404" element={<NotFound />} />
-            <Route path="*" element={<NotFound />} />
-            </Routes>
+                {/* Order flow */}
+                <Route path="/order/choose-domain" element={<ChooseDomain />} />
+                <Route path="/order/choose-design" element={<ChooseDesign />} />
+                <Route path="/order/details" element={<Details />} />
+                <Route path="/order/subscription" element={<SubscriptionPlan />} />
+                <Route path="/order/payment" element={<Payment />} />
+
+                {/* Explicit 404 route (dipakai untuk redirect akses tanpa login) */}
+                <Route path="/404" element={<NotFound />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </I18nProvider>
           </OrderProvider>
         </AuthProvider>
       </BrowserRouter>

@@ -3,8 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useOrder } from "@/contexts/OrderContext";
 import { useOrderPublicSettings } from "@/hooks/useOrderPublicSettings";
+import { useI18n } from "@/hooks/useI18n";
 
 export function OrderSummaryCard({ showEstPrice = true }: { showEstPrice?: boolean }) {
+  const { t, lang } = useI18n();
   const { state } = useOrder();
   const { pricing, contact, subscriptionPlans } = useOrderPublicSettings(state.domain);
 
@@ -19,7 +21,9 @@ export function OrderSummaryCard({ showEstPrice = true }: { showEstPrice?: boole
   const whatsappHref = (() => {
     const phone = (contact.whatsapp_phone ?? "").replace(/\D/g, "");
     if (!phone) return null;
-    const text = encodeURIComponent(contact.whatsapp_message || "Halo, saya mau tanya order...");
+    const text = encodeURIComponent(
+      contact.whatsapp_message || (lang === "id" ? "Halo, saya mau tanya order..." : "Hi, I have a question about my order..."),
+    );
     return `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
   })();
 
@@ -29,7 +33,11 @@ export function OrderSummaryCard({ showEstPrice = true }: { showEstPrice?: boole
     return `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(to)}`;
   })();
 
-  const yearsLabel = state.subscriptionYears ? `${state.subscriptionYears} tahun` : "—";
+  const yearsLabel = state.subscriptionYears
+    ? lang === "id"
+      ? `${state.subscriptionYears} tahun`
+      : `${state.subscriptionYears} year(s)`
+    : "—";
 
   const baseTotalUsd = (() => {
     if (!showEstPrice) return null;
@@ -67,31 +75,29 @@ export function OrderSummaryCard({ showEstPrice = true }: { showEstPrice?: boole
   return (
     <Card className="shadow-soft">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Order Summary</CardTitle>
+        <CardTitle className="text-base">{t("order.summary")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">Domain</span>
-            <span className="text-sm font-medium text-foreground truncate max-w-[220px]">
-              {state.domain || "—"}
-            </span>
+            <span className="text-sm text-muted-foreground">{t("order.domain")}</span>
+            <span className="text-sm font-medium text-foreground truncate max-w-[220px]">{state.domain || "—"}</span>
           </div>
 
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">Plan</span>
+            <span className="text-sm text-muted-foreground">{t("order.plan")}</span>
             <span className="text-sm font-medium text-foreground">{yearsLabel}</span>
           </div>
 
           {showEstPrice ? (
             <>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm text-muted-foreground">Price</span>
+                <span className="text-sm text-muted-foreground">{t("order.price")}</span>
                 <span className="text-sm font-medium text-foreground">{estTotalLabel}</span>
               </div>
               {state.appliedPromo ? (
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm text-muted-foreground">Promo</span>
+                  <span className="text-sm text-muted-foreground">{t("order.promo")}</span>
                   <span className="text-sm font-medium text-foreground truncate max-w-[220px]">
                     {state.appliedPromo.code} (-{formatUsd(promoDiscountUsd)})
                   </span>
@@ -99,34 +105,32 @@ export function OrderSummaryCard({ showEstPrice = true }: { showEstPrice?: boole
               ) : null}
             </>
           ) : null}
+
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">Status</span>
+            <span className="text-sm text-muted-foreground">{t("order.status")}</span>
             <span className="text-sm">
               {state.domainStatus ? (
-                <Badge variant={state.domainStatus === "available" ? "secondary" : "outline"}>
-                  {state.domainStatus}
-                </Badge>
+                <Badge variant={state.domainStatus === "available" ? "secondary" : "outline"}>{state.domainStatus}</Badge>
               ) : (
                 <span className="text-muted-foreground">—</span>
               )}
             </span>
           </div>
+
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">Template</span>
-            <span className="text-sm font-medium text-foreground truncate max-w-[220px]">
-              {state.selectedTemplateName || "—"}
-            </span>
+            <span className="text-sm text-muted-foreground">{t("order.template")}</span>
+            <span className="text-sm font-medium text-foreground truncate max-w-[220px]">{state.selectedTemplateName || "—"}</span>
           </div>
         </div>
 
         <Separator />
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">What’s included</p>
+          <p className="text-sm font-medium text-foreground">{t("order.included")}</p>
           <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
-            <li>Professional website design</li>
-            <li>Mobile responsive layout</li>
-            <li>Basic SEO setup</li>
+            <li>{lang === "id" ? "Desain website profesional" : "Professional website design"}</li>
+            <li>{lang === "id" ? "Layout responsif mobile" : "Mobile responsive layout"}</li>
+            <li>{lang === "id" ? "Setup SEO dasar" : "Basic SEO setup"}</li>
           </ul>
         </div>
 

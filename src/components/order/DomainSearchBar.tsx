@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 type Props = {
   initialValue?: string;
@@ -18,6 +19,7 @@ function normalizeDomain(raw: string) {
 }
 
 export function DomainSearchBar({ initialValue = "", onSubmit, className }: Props) {
+  const { t } = useI18n();
   const [value, setValue] = useState(() => initialValue.replace(/^https?:\/\//, "").replace(/\/$/, ""));
   const normalizedPreview = useMemo(() => normalizeDomain(value), [value]);
 
@@ -39,26 +41,27 @@ export function DomainSearchBar({ initialValue = "", onSubmit, className }: Prop
           <Input
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter your domain name"
+            placeholder={t("domain.placeholder")}
             className="h-12 text-base sm:h-14 sm:text-lg"
             aria-label="Domain name"
           />
         </div>
 
         <Button type="submit" size="lg" className="h-12 sm:h-14 sm:px-8">
-          Search Domain
+          {t("domain.search")}
         </Button>
       </div>
 
       <div className="px-4 pb-3 text-xs text-muted-foreground">
         {normalizedPreview ? (
           <span>
-            Example: <span className="font-medium text-foreground">{normalizedPreview}</span>
+            {t("domain.example")} <span className="font-medium text-foreground">{normalizedPreview}</span>
           </span>
         ) : (
-          <span>Press Enter to search</span>
+          <span>{t("domain.pressEnter")}</span>
         )}
       </div>
     </form>
   );
 }
+
