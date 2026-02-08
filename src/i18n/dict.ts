@@ -96,6 +96,7 @@ export const dict: Dict = {
   "order.contactInfo": { id: "Informasi kontak", en: "Contact information" },
   "order.name": { id: "Nama", en: "Name" },
   "order.email": { id: "Email", en: "Email" },
+  "order.phoneWhatsApp": { id: "Nomor Telp/WhatsApp", en: "Phone/WhatsApp number" },
   "order.country": { id: "Negara", en: "Country" },
   "order.selectCountry": { id: "Pilih negara", en: "Select country" },
   "order.companyOptional": { id: "Perusahaan (opsional)", en: "Company (optional)" },

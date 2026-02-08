@@ -57,7 +57,7 @@ export default function ChooseDomain() {
     }
   }, [setDomainStatus, status]);
 
-  const canContinue = Boolean(lastChecked) && status !== "unavailable";
+  const canContinue = Boolean(lastChecked) && status === "available";
 
   return (
     <OrderLayout title={t("order.step.domain")} step="domain" sidebar={<OrderSummaryCard showEstPrice={false} />}>

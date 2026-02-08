@@ -18,6 +18,11 @@ import { useI18n } from "@/hooks/useI18n";
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   email: z.string().trim().email("Invalid email").max(255),
+  phone: z
+    .string()
+    .trim()
+    .min(6, "Nomor Telp/WhatsApp wajib diisi")
+    .max(30, "Nomor Telp/WhatsApp terlalu panjang"),
   country: z.string().trim().min(1, "Country is required").max(100),
   company: z.string().trim().max(120).optional().or(z.literal("")),
   acceptedTerms: z.boolean().refine((v) => v === true, { message: "You must accept the terms" }),
@@ -34,6 +39,7 @@ export default function Details() {
     () => ({
       name: state.details.name,
       email: state.details.email,
+      phone: state.details.phone,
       country: state.details.country,
       company: state.details.company ?? "",
       acceptedTerms: state.details.acceptedTerms,
@@ -44,6 +50,8 @@ export default function Details() {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues,
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   return (
@@ -94,6 +102,20 @@ export default function Details() {
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("order.phoneWhatsApp")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoComplete="tel" inputMode="tel" placeholder="08xxxxxxxxxx" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="country"
                   render={({ field }) => (
                     <FormItem>
@@ -116,21 +138,21 @@ export default function Details() {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("order.companyOptional")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} autoComplete="organization" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
+
+              <FormField
+                control={form.control}
+                name="company"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("order.companyOptional")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} autoComplete="organization" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -153,7 +175,7 @@ export default function Details() {
                 <Button type="button" variant="outline" onClick={() => navigate("/order/choose-design")}>
                   {t("common.back")}
                 </Button>
-                <Button type="submit" size="lg">
+                <Button type="submit" size="lg" disabled={!form.formState.isValid}>
                   {t("order.continueSubscription")}
                 </Button>
               </div>
