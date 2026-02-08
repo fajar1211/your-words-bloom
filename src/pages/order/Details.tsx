@@ -184,7 +184,16 @@ export default function Details() {
                       return byName?.isoCode ?? "";
                     })();
 
-                    const cities = resolvedProvinceCode ? City.getCitiesOfState("ID", resolvedProvinceCode) || [] : [];
+                    const cities = (() => {
+                      if (!resolvedProvinceCode) return [];
+                      const byState = City.getCitiesOfState("ID", resolvedProvinceCode) || [];
+                      if (byState.length > 0) return byState;
+
+                      // Fallback: some datasets may not resolve via getCitiesOfState for certain provinces.
+                      // Filter from all Indonesian cities by stateCode.
+                      const all = City.getCitiesOfCountry("ID") || [];
+                      return all.filter((c) => String((c as any).stateCode) === resolvedProvinceCode);
+                    })();
                     const cityItems = [...cities].sort((a, b) => String(a.name).localeCompare(String(b.name), "id"));
 
                     return (
