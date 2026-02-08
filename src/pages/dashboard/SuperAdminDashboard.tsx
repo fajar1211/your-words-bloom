@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import {
   Activity,
   BadgePercent,
@@ -54,7 +54,7 @@ export default function SuperAdminDashboard() {
       { title: "Access Control", url: "/dashboard/super-admin/access-control", icon: Bell },
       { title: "Services / Packages", url: "/dashboard/super-admin/packages", icon: Package },
       { title: "Payments", url: "/dashboard/super-admin/payments", icon: CreditCard },
-      { title: "Subscriptions", url: "/dashboard/super-admin/subscriptions", icon: Activity },
+      { title: "Website Packages", url: "/dashboard/super-admin/website-packages", icon: Activity },
       { title: "Promotions", url: "/dashboard/super-admin/promotions", icon: BadgePercent },
       { title: "Audit Logs (soon)", url: "/dashboard/super-admin/audit-logs", icon: FileSearch },
       { title: "Reports (soon)", url: "/dashboard/super-admin/reports", icon: BookOpen },
@@ -139,7 +139,9 @@ export default function SuperAdminDashboard() {
               <Route path="packages" element={<SuperAdminPackages />} />
               <Route path="packages/:id" element={<SuperAdminPackageEdit />} />
               <Route path="payments" element={<SuperAdminPayments />} />
-              <Route path="subscriptions" element={<SuperAdminSubscriptions />} />
+              <Route path="website-packages" element={<SuperAdminSubscriptions />} />
+              {/* Backward compatible redirect */}
+              <Route path="subscriptions" element={<Navigate to="/dashboard/super-admin/website-packages" replace />} />
               <Route path="promotions" element={<SuperAdminPromotions />} />
               <Route path="access-control" element={<SuperAdminAccessControl />} />
               <Route path="audit-logs" element={<SuperAdminPlaceholder title="Audit Logs" />} />
