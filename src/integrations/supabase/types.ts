@@ -1391,6 +1391,39 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_add_ons: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          label: string
+          price_idr: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          price_idr?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          price_idr?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       super_admin_audit_logs: {
         Row: {
           action: string
