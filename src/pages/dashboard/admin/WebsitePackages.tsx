@@ -4,14 +4,6 @@ import { ArrowDown, ArrowUp, Check, Eye, EyeOff, RefreshCcw, Save, Star, StarOff
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -41,11 +33,6 @@ const PUBLIC_PACKAGE_NAME_ORDER = [
 type PackagesCardsAlign = "left" | "center" | "right";
 const LAYOUT_SETTINGS_KEY = "packages_layout";
 
-const ALIGN_OPTIONS: Array<{ value: PackagesCardsAlign; label: string }> = [
-  { value: "left", label: "Kiri" },
-  { value: "center", label: "Tengah" },
-  { value: "right", label: "Kanan" },
-];
 
 function sanitizeAlign(value: unknown): PackagesCardsAlign {
   return value === "left" || value === "right" || value === "center" ? value : "center";
@@ -281,30 +268,6 @@ export default function WebsitePackages() {
         </div>
       </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Tampilan /packages</CardTitle>
-          <CardDescription>Atur posisi kartu paket di halaman publik.</CardDescription>
-        </CardHeader>
-        <CardContent className="max-w-md">
-          <div className="grid gap-2">
-            <Label>Posisi paket</Label>
-            <Select value={cardsAlign} onValueChange={(v) => setCardsAlign(v as PackagesCardsAlign)} disabled={!canSave}>
-              <SelectTrigger>
-                <SelectValue placeholder="Pilih posisi" />
-              </SelectTrigger>
-              <SelectContent>
-                {ALIGN_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">Kiri = rata kiri, Tengah = default, Kanan = rata kanan.</p>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
