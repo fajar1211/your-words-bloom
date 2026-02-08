@@ -5,6 +5,7 @@ type DomainStatus = "available" | "unavailable" | "premium";
 export type OrderDetails = {
   name: string;
   email: string;
+  phone: string;
   country: string;
   company?: string;
   acceptedTerms: boolean;
@@ -58,6 +59,7 @@ const defaultState: OrderState = {
   details: {
     name: "",
     email: "",
+    phone: "",
     country: "",
     company: "",
     acceptedTerms: false,
