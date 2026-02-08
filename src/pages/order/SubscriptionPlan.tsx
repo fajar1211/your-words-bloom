@@ -9,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { computeDiscountedTotal } from "@/lib/packageDurations";
 import { useOrder } from "@/contexts/OrderContext";
 import { useOrderPublicSettings } from "@/hooks/useOrderPublicSettings";
+import { usePackageDurations } from "@/hooks/usePackageDurations";
 import { useI18n } from "@/hooks/useI18n";
 
 function formatIdr(value: number) {
@@ -22,26 +24,46 @@ export default function SubscriptionPlan() {
   const { t } = useI18n();
   const { state, setSubscriptionYears } = useOrder();
   const { pricing, subscriptionPlans } = useOrderPublicSettings(state.domain, state.selectedPackageId);
+  const { rows: durationRows } = usePackageDurations(state.selectedPackageId);
 
-  const baseAnnualUsd = useMemo(() => {
+  const discountByMonths = useMemo(() => {
+    const m = new Map<number, number>();
+    for (const r of durationRows || []) {
+      if (r?.is_active === false) continue;
+      const months = Number((r as any).duration_months ?? 0);
+      const discount = Number((r as any).discount_percent ?? 0);
+      if (Number.isFinite(months) && months > 0) m.set(months, discount);
+    }
+    return m;
+  }, [durationRows]);
+
+  const baseAnnualIdr = useMemo(() => {
     const domain = pricing.domainPriceUsd ?? 0;
     const pkg = pricing.packagePriceUsd ?? 0;
     return domain + pkg;
   }, [pricing.domainPriceUsd, pricing.packagePriceUsd]);
 
+  const monthlyPriceIdr = useMemo(() => {
+    if (!Number.isFinite(baseAnnualIdr) || baseAnnualIdr <= 0) return 0;
+    return baseAnnualIdr / 12;
+  }, [baseAnnualIdr]);
+
   const options = useMemo(
     () =>
-      subscriptionPlans.map((p) => ({
-        years: p.years,
-        label: p.label,
-        totalUsd:
-          typeof (p as any)?.price_usd === "number" && Number.isFinite((p as any).price_usd)
-            ? Number((p as any).price_usd)
-            : baseAnnualUsd > 0
-              ? baseAnnualUsd * p.years
-              : null,
-      })),
-    [baseAnnualUsd, subscriptionPlans],
+      subscriptionPlans.map((p) => {
+        const months = Number(p.years) * 12;
+        const discountPercent = discountByMonths.get(months) ?? 0;
+        const totalIdr = monthlyPriceIdr > 0 ? computeDiscountedTotal({ monthlyPrice: monthlyPriceIdr, months, discountPercent }) : null;
+
+        return {
+          years: p.years,
+          label: p.label,
+          months,
+          discountPercent,
+          totalIdr,
+        };
+      }),
+    [discountByMonths, monthlyPriceIdr, subscriptionPlans],
   );
 
   const selected = state.subscriptionYears;
@@ -96,7 +118,10 @@ export default function SubscriptionPlan() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-base font-semibold text-foreground">{opt.label ?? `${opt.years} Years`}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">{t("order.allIn")}</p>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {t("order.allIn")}
+                            {opt.discountPercent > 0 ? ` • Diskon ${Math.round(opt.discountPercent)}%` : ""}
+                          </p>
                         </div>
                         {isSelected ? (
                           <Badge variant="secondary">{t("order.selected")}</Badge>
@@ -106,7 +131,7 @@ export default function SubscriptionPlan() {
                       </div>
 
                       <div className="mt-4">
-                        <p className="text-2xl font-bold text-foreground">{opt.totalUsd == null ? "—" : formatIdr(opt.totalUsd)}</p>
+                        <p className="text-2xl font-bold text-foreground">{opt.totalIdr == null ? "—" : formatIdr(opt.totalIdr)}</p>
                         <p className="mt-1 text-xs text-muted-foreground">{t("order.totalFor", { years: opt.years })}</p>
                       </div>
                     </button>

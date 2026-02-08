@@ -1,16 +1,32 @@
+import { useMemo } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useOrder } from "@/contexts/OrderContext";
 import { useOrderPublicSettings } from "@/hooks/useOrderPublicSettings";
 import { useOrderAddOns } from "@/hooks/useOrderAddOns";
+import { usePackageDurations } from "@/hooks/usePackageDurations";
+import { computeDiscountedTotal } from "@/lib/packageDurations";
 import { useI18n } from "@/hooks/useI18n";
 
 export function OrderSummaryCard({ showEstPrice = true }: { showEstPrice?: boolean }) {
   const { t, lang } = useI18n();
   const { state } = useOrder();
   const { pricing, contact, subscriptionPlans } = useOrderPublicSettings(state.domain, state.selectedPackageId);
+  const { rows: durationRows } = usePackageDurations(state.selectedPackageId);
   const { total: addOnsTotal } = useOrderAddOns({ packageId: state.selectedPackageId, quantities: state.addOns ?? {} });
+
+  const discountByMonths = useMemo(() => {
+    const m = new Map<number, number>();
+    for (const r of durationRows || []) {
+      if (r?.is_active === false) continue;
+      const months = Number((r as any).duration_months ?? 0);
+      const discount = Number((r as any).discount_percent ?? 0);
+      if (Number.isFinite(months) && months > 0) m.set(months, discount);
+    }
+    return m;
+  }, [durationRows]);
 
   const formatIdr = (value: number) => {
     return `Rp ${Math.round(value).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
@@ -41,6 +57,21 @@ export function OrderSummaryCard({ showEstPrice = true }: { showEstPrice?: boole
     if (!showEstPrice) return null;
     if (!state.subscriptionYears) return null;
 
+    const months = Number(state.subscriptionYears) * 12;
+    const discountPercent = discountByMonths.get(months) ?? 0;
+
+    // Prefer Duration & Discount config (package_durations).
+    if (discountByMonths.size > 0) {
+      const domain = pricing.domainPriceUsd ?? null;
+      const pkg = pricing.packagePriceUsd ?? null;
+      if (domain == null || pkg == null) return null;
+
+      const baseAnnual = domain + pkg;
+      const monthly = baseAnnual / 12;
+      return computeDiscountedTotal({ monthlyPrice: monthly, months, discountPercent }) + addOnsTotal;
+    }
+
+    // Fallback to legacy website_settings.order_subscription_plans price override.
     const selectedPlan = subscriptionPlans.find((p) => p.years === state.subscriptionYears);
     const planOverrideUsd =
       typeof selectedPlan?.price_usd === "number" && Number.isFinite(selectedPlan.price_usd) ? selectedPlan.price_usd : null;
