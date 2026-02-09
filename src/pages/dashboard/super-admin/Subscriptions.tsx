@@ -68,13 +68,14 @@ function computePlanAutoPrice(
   p: Pick<PlanRow, "years" | "base_price_idr" | "discount_percent">,
   opts?: { isMonthlyBase?: boolean },
 ): number {
-  const years = Math.max(1, asNumber(p.years, 1));
+  // Support fractional years for marketing packages (e.g. 0.5 year = 6 months)
+  const years = Math.max(0.5, asNumber(p.years, 1));
   const base = Math.max(0, asNumber(p.base_price_idr, 0));
   const discount = clampPercent(p.discount_percent);
 
   // For monthly packages: gross = monthlyBase * (12 * years)
   // For yearly packages: gross = yearlyBase * years
-  const gross = (opts?.isMonthlyBase ? base * 12 * years : base * years);
+  const gross = opts?.isMonthlyBase ? base * 12 * years : base * years;
   const net = gross * (1 - discount / 100);
   return Math.max(0, Math.round(net));
 }
@@ -551,7 +552,7 @@ export default function SuperAdminSubscriptions() {
 
           <div className="grid gap-2 rounded-md border bg-muted/20 p-3 sm:grid-cols-12">
             <div className="sm:col-span-4">
-              <Label className="text-xs">{isMarketingPackage ? "Harga dasar / bulan" : "Harga dasar / tahun"}</Label>
+              <Label className="text-xs">{isMarketingPackage ? "Harga dasar / Bulan" : "Harga dasar / tahun"}</Label>
               <Input
                 className="w-full"
                 value={String(baseYearMeta.value ?? 0)}
@@ -585,6 +586,7 @@ export default function SuperAdminSubscriptions() {
                 planAutoOpts,
               );
               const isManual = p.manual_override === true;
+              const monthsForMarketing = Math.round(Math.max(0.5, asNumber(p.years, 1)) * 12);
 
               return (
                 <div key={`${p.years}-${idx}`} className="grid min-w-0 gap-2 rounded-md border bg-muted/20 p-3 md:grid-cols-12">
@@ -604,7 +606,7 @@ export default function SuperAdminSubscriptions() {
                           }),
                         )
                       }
-                      inputMode="numeric"
+                      inputMode="decimal"
                       disabled={plansSaving || !isEditingPlans}
                     />
                   </div>
@@ -673,7 +675,7 @@ export default function SuperAdminSubscriptions() {
 
                     <div className="mt-1 text-[11px] text-muted-foreground">
                       {isMarketingPackage
-                        ? `Dasar: ${baseYearMeta.value ?? 0} × 12 × ${p.years} tahun`
+                        ? `Dasar: ${baseYearMeta.value ?? 0} × ${monthsForMarketing} bulan (${p.years} tahun)`
                         : `Dasar: ${baseYearMeta.value ?? 0} × ${p.years} tahun`}
                     </div>
 
