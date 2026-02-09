@@ -24,6 +24,7 @@ import { Plus, Save, Trash2 } from "lucide-react";
 type PackageOption = {
   id: string;
   name: string;
+  type: string;
 };
 
 type TldPriceRow = {
@@ -50,6 +51,8 @@ type SubscriptionAddOnRow = {
 
 const SETTINGS_SUBSCRIPTION_PLANS_KEY = "order_subscription_plans";
 
+// Keep ordering consistent with /dashboard/super-admin/all-packages
+const PACKAGE_TYPE_ORDER = ["starter", "growth", "pro", "optimize", "scale", "dominate"] as const;
 function asNumber(v: unknown, fallback = 0) {
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : fallback;
@@ -98,12 +101,33 @@ export default function SuperAdminSubscriptions() {
     setPricingLoading(true);
     try {
       const [{ data: pkgRows, error: pkgErr }, pricingRes] = await Promise.all([
-        (supabase as any).from("packages").select("id,name").order("name"),
+        (supabase as any).from("packages").select("id,name,type,created_at"),
         (supabase as any).functions.invoke("admin-order-domain-pricing", { body: { action: "get" } }),
       ]);
       if (pkgErr) throw pkgErr;
 
-      const pkgOptions = Array.isArray(pkgRows) ? (pkgRows as any).map((p: any) => ({ id: p.id, name: p.name })) : [];
+      const mapped = Array.isArray(pkgRows)
+        ? (pkgRows as any[]).map((p: any) => ({ id: String(p.id), name: String(p.name ?? ""), type: String(p.type ?? ""), created_at: p.created_at }))
+        : [];
+
+      const rank = (pkgType: string) => {
+        const i = PACKAGE_TYPE_ORDER.indexOf(String(pkgType ?? "").toLowerCase().trim() as any);
+        return i === -1 ? 999 : i;
+      };
+
+      mapped.sort((a, b) => {
+        const ra = rank(a.type);
+        const rb = rank(b.type);
+        if (ra !== rb) return ra - rb;
+        const an = a.name.toLowerCase();
+        const bn = b.name.toLowerCase();
+        if (an < bn) return -1;
+        if (an > bn) return 1;
+        // fallback: created_at
+        return String(a.created_at ?? "").localeCompare(String(b.created_at ?? ""));
+      });
+
+      const pkgOptions: PackageOption[] = mapped.map((p) => ({ id: p.id, name: p.name, type: p.type }));
       setPackages(pkgOptions);
 
       const payload = (pricingRes as any)?.data ?? {};
@@ -367,6 +391,11 @@ export default function SuperAdminSubscriptions() {
     return found?.name || "(No package selected)";
   }, [packages, pricingPackageId]);
 
+  const isComingSoon = useMemo(() => {
+    const n = selectedPackageName.toLowerCase().trim();
+    return n === "full digital marketing" || n === "blog + social media";
+  }, [selectedPackageName]);
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold text-foreground">Duration Packages</h1>
@@ -406,8 +435,19 @@ export default function SuperAdminSubscriptions() {
         </CardContent>
       </Card>
 
-      {/* Domain Pricing (TLD) - top */}
-      <Card>
+      {isComingSoon ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Coming soon</CardTitle>
+            <CardDescription>
+              Pengaturan untuk package “{selectedPackageName}” belum tersedia di halaman ini.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <> 
+          {/* Domain Pricing (TLD) - top */}
+          <Card>
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -769,6 +809,8 @@ export default function SuperAdminSubscriptions() {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }
