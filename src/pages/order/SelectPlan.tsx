@@ -15,7 +15,6 @@ type PackageRow = {
   name: string;
   type: string;
   description: string | null;
-  features: any | null;
   price: number | null;
   is_recommended?: boolean | null;
   is_active?: boolean | null;
@@ -36,11 +35,6 @@ function isGrowthOrPro(pkg: Pick<PackageRow, "name" | "type">) {
   return isGrowth || isPro;
 }
 
-function formatPackageName(name: string) {
-  // Keep common suffixes like "/Bulan" on the same line as the word before it.
-  return name.replace(/\s\/(Bulan|Month)\b/g, "\u00A0/$1");
-}
-
 export default function SelectPlan() {
   const navigate = useNavigate();
   const query = useQuery();
@@ -58,7 +52,7 @@ export default function SelectPlan() {
       try {
         const { data, error } = await supabase
           .from("packages")
-          .select("id,name,type,description,features,price,is_recommended,is_active,show_on_public")
+          .select("id,name,type,description,price,is_recommended,is_active,show_on_public")
           .eq("is_active", true)
           .eq("show_on_public", true);
 
@@ -124,24 +118,10 @@ export default function SelectPlan() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-base font-semibold text-foreground leading-snug">
-                            {formatPackageName(pkg.name)}
-                          </p>
+                          <p className="text-base font-semibold text-foreground truncate">{pkg.name}</p>
                           <p className="mt-1 text-sm text-muted-foreground">{pkg.description || pkg.type}</p>
-
-                          {Array.isArray(pkg.features) && pkg.features.length ? (
-                            <ul className="mt-3 space-y-1 text-sm text-muted-foreground list-disc pl-5">
-                              {pkg.features.map((f: any, i: number) => (
-                                <li key={i}>{String(f)}</li>
-                              ))}
-                            </ul>
-                          ) : null}
                         </div>
-                        {pkg.is_recommended ? (
-                          <Badge variant="secondary">Rekomendasi</Badge>
-                        ) : (
-                          <Badge variant="outline">Plan</Badge>
-                        )}
+                        {pkg.is_recommended ? <Badge variant="secondary">Rekomendasi</Badge> : <Badge variant="outline">Plan</Badge>}
                       </div>
                       <div className="mt-4">
                         <p className="text-2xl font-bold text-foreground">
