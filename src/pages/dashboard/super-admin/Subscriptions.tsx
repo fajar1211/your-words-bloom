@@ -331,12 +331,18 @@ export default function SuperAdminSubscriptions() {
     }
   };
 
-  const fetchAddOns = async () => {
+  const fetchAddOns = async (packageId: string) => {
     setAddOnsLoading(true);
     try {
+      if (!packageId) {
+        setAddOns([]);
+        return;
+      }
+
       const { data, error } = await (supabase as any)
         .from("subscription_add_ons")
         .select("id,label,description,price_idr,is_active,sort_order")
+        .eq("package_id", packageId)
         .order("sort_order", { ascending: true });
       if (error) throw error;
 
@@ -368,9 +374,14 @@ export default function SuperAdminSubscriptions() {
   useEffect(() => {
     fetchDomainPricing();
     fetchPlans();
-    fetchAddOns();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!pricingPackageId) return;
+    fetchAddOns(pricingPackageId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pricingPackageId]);
 
   const saveDomainPricing = async () => {
     setPricingSaving(true);
@@ -466,6 +477,7 @@ export default function SuperAdminSubscriptions() {
     try {
       const normalized = addOns.map((a, idx) => {
         const base = {
+          package_id: pricingPackageId,
           label: String(a.label ?? "").trim(),
           description: String(a.description ?? "").trim() || null,
           price_idr: Math.max(0, Math.floor(safeNumber(a.price_idr))),
@@ -501,7 +513,7 @@ export default function SuperAdminSubscriptions() {
 
       toast({ title: "Saved", description: "Subscription add-ons updated." });
       setIsEditingAddOns(false);
-      await fetchAddOns();
+      await fetchAddOns(pricingPackageId);
     } catch (e: any) {
       console.error(e);
       toast({ variant: "destructive", title: "Failed to save", description: e?.message ?? "Unknown error" });
@@ -515,7 +527,7 @@ export default function SuperAdminSubscriptions() {
       const { error } = await (supabase as any).from("subscription_add_ons").delete().eq("id", id);
       if (error) throw error;
       toast({ title: "Deleted", description: "Add-on removed." });
-      await fetchAddOns();
+      if (pricingPackageId) await fetchAddOns(pricingPackageId);
     } catch (e: any) {
       console.error(e);
       toast({ variant: "destructive", title: "Failed to delete", description: e?.message ?? "Unknown error" });
@@ -916,13 +928,18 @@ export default function SuperAdminSubscriptions() {
         </CardContent>
       </Card>
 
-      {/* Add-ons - bottom */}
+        </>
+      )}
+
+      {/* Add-ons (per package) */}
       <Card>
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div>
               <CardTitle>Add-ons</CardTitle>
-              <CardDescription>Checklist add-ons yang tampil di bawah pilihan durasi pada /order/subscription.</CardDescription>
+              <CardDescription>
+                Checklist add-ons yang tampil di bawah pilihan durasi pada /order/subscription (tersimpan per package).
+              </CardDescription>
             </div>
             <Badge variant="outline">Total: {addOnsCountLabel}</Badge>
           </div>
@@ -1054,8 +1071,6 @@ export default function SuperAdminSubscriptions() {
           </div>
         </CardContent>
       </Card>
-        </>
-      )}
     </div>
   );
 }

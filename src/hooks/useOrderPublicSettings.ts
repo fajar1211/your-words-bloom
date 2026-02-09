@@ -153,6 +153,10 @@ export function useOrderPublicSettings(domain?: string, selectedPackageId?: stri
   const [tldPrices, setTldPrices] = useState<Array<{ tld: string; price_usd: number }>>([]);
   const [packagePriceUsd, setPackagePriceUsd] = useState<number | null>(null);
 
+  const [durationRows, setDurationRows] = useState<
+    Array<{ duration_months: number; discount_percent: number; is_active: boolean; sort_order: number }> | null
+  >(null);
+
   const tld = useMemo(() => (domain ? extractTld(domain) : null), [domain]);
 
   useEffect(() => {
@@ -185,22 +189,20 @@ export function useOrderPublicSettings(domain?: string, selectedPackageId?: stri
         const effectivePkgId = selectedPackageId ?? pkgId;
 
         if (effectivePkgId) {
-          const { data: pkgRow } = await (supabase as any)
-            .from("packages")
-            .select("price")
-            .eq("id", effectivePkgId)
-            .maybeSingle();
+          const [{ data: pkgRow }, { data: prices }, { data: durations }] = await Promise.all([
+            (supabase as any).from("packages").select("price").eq("id", effectivePkgId).maybeSingle(),
+            (supabase as any).from("domain_tld_prices").select("tld,price_usd").eq("package_id", effectivePkgId),
+            (supabase as any)
+              .from("package_durations")
+              .select("duration_months,discount_percent,is_active,sort_order")
+              .eq("package_id", effectivePkgId)
+              .order("sort_order", { ascending: true })
+              .order("duration_months", { ascending: true }),
+          ]);
+
           const p = safeNumber((pkgRow as any)?.price);
           setPackagePriceUsd(p ?? null);
-        } else {
-          setPackagePriceUsd(null);
-        }
 
-        if (effectivePkgId) {
-          const { data: prices } = await (supabase as any)
-            .from("domain_tld_prices")
-            .select("tld,price_usd")
-            .eq("package_id", effectivePkgId);
           setTldPrices(
             Array.isArray(prices)
               ? prices
@@ -208,8 +210,21 @@ export function useOrderPublicSettings(domain?: string, selectedPackageId?: stri
                   .filter((p: any) => p.tld)
               : [],
           );
+
+          setDurationRows(
+            Array.isArray(durations)
+              ? (durations as any[]).map((d) => ({
+                  duration_months: Number(d?.duration_months ?? 0),
+                  discount_percent: Number(d?.discount_percent ?? 0),
+                  is_active: d?.is_active !== false,
+                  sort_order: Number(d?.sort_order ?? 0),
+                }))
+              : null,
+          );
         } else {
+          setPackagePriceUsd(null);
           setTldPrices([]);
+          setDurationRows(null);
         }
       } catch (e: any) {
         console.error(e);
@@ -237,6 +252,7 @@ export function useOrderPublicSettings(domain?: string, selectedPackageId?: stri
     subscriptionPlans: subscriptionPlans
       .filter((p) => p.is_active !== false)
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    durationRows: durationRows?.filter((d) => d.is_active !== false) ?? [],
     pricing: {
       defaultPackageId,
       selectedPackageId: selectedPackageId ?? null,

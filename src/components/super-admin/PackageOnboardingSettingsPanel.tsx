@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import PackageAddOnsEditor, { type PackageAddOnDraft } from "@/components/super-admin/PackageAddOnsEditor";
 
-import { DEFAULT_DURATION_PRESETS, formatDurationLabel, type PackageDurationRow } from "@/lib/packageDurations";
+import { DEFAULT_DURATION_PRESETS, formatDurationLabel, type PackageDurationRow, computeDiscountedTotal } from "@/lib/packageDurations";
 
 type DurationDraft = {
   id?: string;
@@ -132,6 +132,21 @@ export default function PackageOnboardingSettingsPanel({ packageId }: { packageI
 
   const canSave = useMemo(() => Boolean(pkg?.id), [pkg?.id]);
 
+  const formatIdr = (value: number) => {
+    return `Rp ${Math.round(value).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
+  };
+
+  const discountByMonths = useMemo(() => {
+    const m = new Map<number, number>();
+    for (const r of durations || []) {
+      if (!r.is_active) continue;
+      const months = Number(r.duration_months ?? 0);
+      const discount = Number(r.discount_percent ?? 0);
+      if (Number.isFinite(months) && months > 0) m.set(months, discount);
+    }
+    return m;
+  }, [durations]);
+
   const handleSave = async () => {
     if (!pkg) return;
     if (!canSave) return;
@@ -177,6 +192,38 @@ export default function PackageOnboardingSettingsPanel({ packageId }: { packageI
             <div className="text-sm text-muted-foreground">Loading...</div>
           ) : (
             <div className="space-y-4">
+              <div className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-12">
+                <div className="sm:col-span-5 grid gap-2">
+                  <Label>Harga dasar / bulan</Label>
+                  <Input
+                    inputMode="numeric"
+                    value={String(pkg.price ?? 0)}
+                    onChange={(e) => {
+                      const v = e.target.value === "" ? 0 : Number(e.target.value);
+                      setPkg((prev) => (prev ? { ...prev, price: Number.isFinite(v) ? v : 0 } : prev));
+                    }}
+                    disabled={saving}
+                  />
+                </div>
+                <div className="sm:col-span-7">
+                  <div className="text-xs text-muted-foreground">Otomatis dihitung di /order/subscribe: bulan × (12 × tahun) lalu diskon % (jika ada).</div>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    {[1, 2, 3].map((years) => {
+                      const months = years * 12;
+                      const discountPercent = discountByMonths.get(months) ?? 0;
+                      const total = computeDiscountedTotal({ monthlyPrice: Number(pkg.price ?? 0), months, discountPercent });
+                      return (
+                        <div key={years} className="rounded-md border border-border bg-muted/20 px-3 py-2">
+                          <div className="text-xs text-muted-foreground">{years} tahun</div>
+                          <div className="text-sm font-semibold text-foreground">{formatIdr(total)}</div>
+                          <div className="text-[11px] text-muted-foreground">Diskon: {discountPercent}%</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
               <PackageAddOnsEditor
                 value={addOns}
                 onChange={setAddOns}
