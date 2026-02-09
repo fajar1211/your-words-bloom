@@ -57,7 +57,7 @@ export default function Payment() {
 
   const { rows: durationRows } = usePackageDurations(effectivePackageId);
   const { total: packageAddOnsTotal } = useOrderAddOns({ packageId: effectivePackageId, quantities: state.addOns ?? {} });
-  const { total: subscriptionAddOnsTotal } = useSubscriptionAddOns({ selected: state.subscriptionAddOns ?? {} });
+  const { total: subscriptionAddOnsTotal } = useSubscriptionAddOns({ selected: state.subscriptionAddOns ?? {}, packageId: effectivePackageId });
   const addOnsTotal = packageAddOnsTotal + subscriptionAddOnsTotal;
   const midtrans = useMidtransOrderSettings();
   const paypal = usePaypalOrderSettings();

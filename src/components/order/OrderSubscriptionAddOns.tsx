@@ -13,7 +13,10 @@ function formatIdr(value: number) {
 
 export function OrderSubscriptionAddOns() {
   const { state, setSubscriptionAddOnSelected } = useOrder();
-  const { loading, items, total } = useSubscriptionAddOns({ selected: state.subscriptionAddOns ?? {} });
+  const { loading, items, total } = useSubscriptionAddOns({
+    selected: state.subscriptionAddOns ?? {},
+    packageId: state.selectedPackageId,
+  });
 
   const hasAny = useMemo(() => Object.values(state.subscriptionAddOns ?? {}).some(Boolean), [state.subscriptionAddOns]);
 

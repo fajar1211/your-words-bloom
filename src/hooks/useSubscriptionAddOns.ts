@@ -13,8 +13,9 @@ export type SubscriptionAddOn = {
 
 export function useSubscriptionAddOns(params: {
   selected: Record<string, boolean>;
+  packageId: string | null;
 }) {
-  const { selected } = params;
+  const { selected, packageId } = params;
 
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<SubscriptionAddOn[]>([]);
@@ -24,10 +25,16 @@ export function useSubscriptionAddOns(params: {
     (async () => {
       setLoading(true);
       try {
+        if (!packageId) {
+          if (mounted) setItems([]);
+          return;
+        }
+
         const { data, error } = await (supabase as any)
           .from("subscription_add_ons")
           .select("id,label,description,price_idr,is_active,sort_order")
           .eq("is_active", true)
+          .eq("package_id", packageId)
           .order("sort_order", { ascending: true });
         if (error) throw error;
         if (!mounted) return;
@@ -42,7 +49,7 @@ export function useSubscriptionAddOns(params: {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [packageId]);
 
   const total = useMemo(() => {
     if (!items.length) return 0;

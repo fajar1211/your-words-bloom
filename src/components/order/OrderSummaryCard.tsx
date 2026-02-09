@@ -22,7 +22,7 @@ export function OrderSummaryCard({
   const { state } = useOrder();
   const { contact, subscriptionPlans } = useOrderPublicSettings(state.domain, state.selectedPackageId);
   const { total: packageAddOnsTotal } = useOrderAddOns({ packageId: state.selectedPackageId, quantities: state.addOns ?? {} });
-  const { total: subscriptionAddOnsTotal } = useSubscriptionAddOns({ selected: state.subscriptionAddOns ?? {} });
+  const { total: subscriptionAddOnsTotal } = useSubscriptionAddOns({ selected: state.subscriptionAddOns ?? {}, packageId: state.selectedPackageId });
   const addOnsTotal = packageAddOnsTotal + subscriptionAddOnsTotal;
 
   const formatIdr = (value: number) => {

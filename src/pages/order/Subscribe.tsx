@@ -10,39 +10,69 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useOrder } from "@/contexts/OrderContext";
 import { useOrderPublicSettings } from "@/hooks/useOrderPublicSettings";
+import { computeDiscountedTotal } from "@/lib/packageDurations";
 
 function formatIdr(value: number) {
   return `Rp ${Math.round(value).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
 }
 
+function isMonthlyPackageName(name: string | null) {
+  const n = String(name ?? "").toLowerCase().trim();
+  return n === "full digital marketing" || n === "blog + social media";
+}
+
 export default function Subscribe() {
   const navigate = useNavigate();
   const { state, setSubscriptionYears } = useOrder();
-  const { subscriptionPlans } = useOrderPublicSettings(state.domain, state.selectedPackageId);
+  const { subscriptionPlans, pricing, durationRows } = useOrderPublicSettings(state.domain, state.selectedPackageId);
 
-  const options = useMemo(
-    () =>
-      (subscriptionPlans || [])
-        .map((p: any) => {
-          const years = Number(p?.years ?? 0);
-          const label = String(p?.label ?? "").trim();
-          const priceIdr = Number(p?.price_usd ?? 0);
-          const isActive = p?.is_active !== false;
-          const sortOrderRaw = (p as any)?.sort_order;
-          const sortOrder = Number.isFinite(Number(sortOrderRaw)) ? Number(sortOrderRaw) : years || 0;
+  const options = useMemo(() => {
+    const isMonthly = isMonthlyPackageName(state.selectedPackageName);
+    const monthlyBase = pricing.packagePriceUsd ?? null;
 
-          return {
-            years,
-            label,
-            priceIdr,
-            isActive,
-            sortOrder,
-          };
-        })
-        .filter((opt) => opt.years > 0 && opt.isActive)
-        .sort((a, b) => a.sortOrder - b.sortOrder),
-    [subscriptionPlans],
-  );
+    if (isMonthly && monthlyBase != null) {
+      const discountByMonths = new Map<number, number>();
+      for (const r of durationRows || []) {
+        if ((r as any)?.is_active === false) continue;
+        const months = Number((r as any)?.duration_months ?? 0);
+        const discount = Number((r as any)?.discount_percent ?? 0);
+        if (Number.isFinite(months) && months > 0) discountByMonths.set(months, discount);
+      }
+
+      return [1, 2, 3].map((years) => {
+        const months = years * 12;
+        const discountPercent = discountByMonths.get(months) ?? 0;
+        const priceIdr = computeDiscountedTotal({ monthlyPrice: monthlyBase, months, discountPercent });
+        return {
+          years,
+          label: `Durasi ${years} Tahun`,
+          priceIdr,
+          isActive: true,
+          sortOrder: years,
+        };
+      });
+    }
+
+    return (subscriptionPlans || [])
+      .map((p: any) => {
+        const years = Number(p?.years ?? 0);
+        const label = String(p?.label ?? "").trim();
+        const priceIdr = Number(p?.price_usd ?? 0);
+        const isActive = p?.is_active !== false;
+        const sortOrderRaw = (p as any)?.sort_order;
+        const sortOrder = Number.isFinite(Number(sortOrderRaw)) ? Number(sortOrderRaw) : years || 0;
+
+        return {
+          years,
+          label,
+          priceIdr,
+          isActive,
+          sortOrder,
+        };
+      })
+      .filter((opt) => opt.years > 0 && opt.isActive)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [durationRows, pricing.packagePriceUsd, state.selectedPackageName, subscriptionPlans]);
 
   const selected = state.subscriptionYears;
 

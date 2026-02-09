@@ -117,6 +117,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       selectedPackageName: pkg?.name ?? null,
       // Reset add-ons when package changes.
       addOns: {},
+      subscriptionAddOns: {},
     }));
   }, []);
 
